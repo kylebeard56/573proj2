@@ -22,25 +22,25 @@ class FTPReceiver:
     def __init__(self):
         pass
 
-    def listen(self, port):
+    def listen(self, port, filename):
 
         # NOTE: https://pymotw.com/2/socket/tcp.html
 
-        # Create a TCP/IP socket
+        # create a TCP/IP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address = ('localhost', 10000)
 
-        # Bind the socket to the port
+        # bind the socket to the port
+        server_address = ('localhost', 10000)
         sock.bind(server_address)
 
-        # Listen for incoming connections
-        sock.listen(port)
+        # listen for incoming connections
+        sock.listen(5) # 5 is the number of connections requests
 
-        # Wait for a connection
+        # wait for a connection
         while True:
             print >> sys.stderr, 'Waiting for a connection...'
             connection, client_address = sock.accept()
-            self.connected(connection, client_address)
+            self.connected(connection, client_address, filename)
 
     # This function computes the checksum from the received data to validate
     def validateChecksum(self, data):
@@ -49,19 +49,20 @@ class FTPReceiver:
         return True
 
     # This function is called when the server listening is connected with a client
-    def connected(self, connection, client):
+    def connected(self, connection, client, filename):
 
-        # Handle the connection
+        message = ""
+
+        # handle the connection
         try:
             print >> sys.stderr, 'Connection from ', client
 
-            message = ""
             sequence = 0
 
-            # Receive the data in small chunks and retransmit it
+            # receive the data in small chunks and retransmit it
             while True:
 
-                # Receive message and append to full message
+                # receive message and append to full message
                 data = connection.recv(16)
                 message += data
                 print >> sys.stderr, 'received "%s"' % data
@@ -82,7 +83,7 @@ class FTPReceiver:
                 else:
                     print("out-of-sequence data received - resending ack")
 
-                # Construct ACK here tuple and increment sequence number
+                # construct ACK here tuple and increment sequence number
                 ack = (sequence, 0000000000000000, 1010101010101010)
 
                 if data:
@@ -93,5 +94,11 @@ class FTPReceiver:
                     break
 
         finally:
-            # Clean up the connection
+
+            # clean up the connection
             connection.close()
+
+            # write data to output file specific from p2mpserver invokation
+            f = open(filename + ".txt", "w+")
+            f.write(message)
+            f.close()

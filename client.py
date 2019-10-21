@@ -24,6 +24,7 @@ receiver have arrived at the sender), at which time the sender proceeds to trans
 
 """
 
+import sys
 import socket
 
 
@@ -33,8 +34,48 @@ class FTPSender:
     def __init__(self):
         pass
 
-    def main(self):
-        print("FTPClient class startup")
+    def startClient(self, name, port, filename, mss):
 
-    def connectClient(self, name, port, mss):
-        print("Connecting client: " + str(name))
+        # NOTE: https://docs.python.org/2/howto/sockets.html
+
+        # create a TCP/IP socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # connect the client socket to the well-known server
+        server_address = ('localhost', port)
+        sock.connect(server_address)
+
+        # listen for incoming connections
+        sock.listen(5) # 5 is the number of connections requests
+
+        # read file and call rdt_send
+        f = open(filename + ".txt", "a")
+        message = f.read()
+
+        # call reliable data transfer 3.0 (stop-and-wait)
+        self.rdt_send(sock, message, mss)
+
+    def rdt_send(self, sock, message, mss):
+        # todo: handle timeout and ack between this specific client (sender) and server (receiver)
+
+        try:
+
+            # transfer file
+            print >> sys.stderr, 'sending "%s"' % message
+            sock.sendall(message)
+
+            # look for the response
+            amount_received = 0
+            amount_expected = len(message)
+
+            # todo: integrate timeout and ACK somehow in here
+
+            while amount_received < amount_expected:
+                data = sock.recv(16) # todo: should this be MSS?
+                amount_received += len(data)
+                print >> sys.stderr, 'received "%s"' % data
+
+        finally:
+            print >> sys.stderr, 'closing socket'
+            sock.close()
+

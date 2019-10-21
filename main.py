@@ -22,32 +22,29 @@ if __name__ == "__main__":
     # Invoke client: p2mpclient server-1 server-2 server-3 server-port# file-name MSS
     # --> ex: python main.py p2mpclient server1 server2 server3 7735 test.txt 500
 
-    argLength = len(sys.argv)
-    invokation = sys.argv[1] # either p2mpserver or p2mpclient
-    print(invokation)
-
     # handle actions for client or server based on command argument
-    if invokation == "p2mpserver":
+    if sys.argv[1] == "p2mpserver":
 
         # extract parameters from command line argument
         port = sys.argv[2]
         filename = sys.argv[3]
         lossProbability = sys.argv[4]
-        ftp = server.FTPReceiver()
-        ftp.listen(port)
 
-    elif invokation == "p2mpclient":
+        # initialize Receiver class to setup listener on port
+        ftp = server.FTPReceiver()
+        ftp.listen(port, filename)
+
+    elif sys.argv[1] == "p2mpclient":
 
         # extract parameters from command line argument
-        port = sys.argv[argLength - 3]
-        filename = sys.argv[argLength - 2]
-        mss = sys.argv[argLength - 1]
-        print(str(port) + " " + str(filename) + " " + str(mss))
+        port = sys.argv[len(sys.argv) - 3]
+        filename = sys.argv[len(sys.argv) - 2]
+        mss = sys.argv[len(sys.argv) - 1]
 
-        # get name and connect each client to the server
+        # initialize Sender class to setup each client to connect to port
         ftp = client.FTPSender()
-        for i in range(2, argLength - 3, 1):
-            ftp.connectClient(sys.argv[i], port, mss)
+        for i in range(2, len(sys.argv) - 3, 1):
+            ftp.startClient(sys.argv[i], port, filename, mss)
 
     else:
         print("Command not recognized. Please enter p2mpserver or p2mpclient with arguments")
