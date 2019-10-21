@@ -2,35 +2,17 @@
 NC STATE CSE 573 PROJECT 2
 
 @author kylebeard, hongyifan
+
+------------------------------
+The P2MP-FTP client will play the role of the sender that connects to a set of P2MP-FTP servers that play
+the role of the receivers in the reliable data transfer. All data transfers are from sender (client) to
+receivers (servers) only; only ACK packets travel from receivers to sender.
+
 """
 
 import sys
-
-"""
-The P2MP-FTP client will play the role of the sender that
-connects to a set of P2MP-FTP servers that play the role of the receivers in the reliable data transfer.
-All data transfers are from sender (client) to receivers (servers) only; only ACK packets travel from receivers
-to sender.
-"""
-
-# The P2MP-FTP Server (Receiver)
-class FTPServer:
-
-    def main(self):
-        print("FTPServer class setup")
-
-    def connectServer(self):
-        print("connect")
-
-# The P2MP-FTP Client (Sender)
-class FTPClient:
-
-    def main(self):
-        print("FTPClient class setup")
-
-    def connectClient(self, name, port, mss):
-        print("Connecting client: " + str(name))
-
+import client
+import server
 
 if __name__ == "__main__":
 
@@ -46,7 +28,14 @@ if __name__ == "__main__":
 
     # handle actions for client or server based on command argument
     if invokation == "p2mpserver":
-        print("do stuff")
+
+        # extract parameters from command line argument
+        port = sys.argv[2]
+        filename = sys.argv[3]
+        lossProbability = sys.argv[4]
+        ftp = server.FTPReceiver()
+        ftp.listen(port)
+
     elif invokation == "p2mpclient":
 
         # extract parameters from command line argument
@@ -56,7 +45,7 @@ if __name__ == "__main__":
         print(str(port) + " " + str(filename) + " " + str(mss))
 
         # get name and connect each client to the server
-        ftp = FTPClient()
+        ftp = client.FTPSender()
         for i in range(2, argLength - 3, 1):
             ftp.connectClient(sys.argv[i], port, mss)
 
