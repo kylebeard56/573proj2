@@ -42,13 +42,15 @@ class FTPSender:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # connect the client socket to the well-known server
-        server_address = ('localhost', port)
+        server_address = ('192.168.0.1', port)
+        print("connecting client to server...")
         sock.connect(server_address)
 
         # listen for incoming connections
         sock.listen(5) # 5 is the number of connections requests
 
         # read file and call rdt_send
+        print("reading file")
         f = open(filename + ".txt", "a")
         message = f.read()
 
@@ -56,12 +58,13 @@ class FTPSender:
         self.rdt_send(sock, message, mss)
 
     def rdt_send(self, sock, message, mss):
+
         # todo: handle timeout and ack between this specific client (sender) and server (receiver)
 
         try:
 
             # transfer file
-            print >> sys.stderr, 'sending "%s"' % message
+            print("sending " + message)
             sock.sendall(message)
 
             # look for the response
@@ -69,13 +72,14 @@ class FTPSender:
             amount_expected = len(message)
 
             # todo: integrate timeout and ACK somehow in here
+            # todo: include the random packet loss probability
 
             while amount_received < amount_expected:
                 data = sock.recv(16) # todo: should this be MSS?
                 amount_received += len(data)
-                print >> sys.stderr, 'received "%s"' % data
+                print("received " + data)
 
         finally:
-            print >> sys.stderr, 'closing socket'
+            print("closing socket")
             sock.close()
 

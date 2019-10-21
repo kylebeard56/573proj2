@@ -26,7 +26,7 @@ if __name__ == "__main__":
     if sys.argv[1] == "p2mpserver":
 
         # extract parameters from command line argument
-        port = sys.argv[2]
+        port = int(sys.argv[2])
         filename = sys.argv[3]
         lossProbability = sys.argv[4]
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     elif sys.argv[1] == "p2mpclient":
 
         # extract parameters from command line argument
-        port = sys.argv[len(sys.argv) - 3]
+        port = int(sys.argv[len(sys.argv) - 3])
         filename = sys.argv[len(sys.argv) - 2]
         mss = sys.argv[len(sys.argv) - 1]
 

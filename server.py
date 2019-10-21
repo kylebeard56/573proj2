@@ -30,7 +30,8 @@ class FTPReceiver:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # bind the socket to the port
-        server_address = ('localhost', 10000)
+        server_address = ('127.0.0.1', port)
+        print("binding server...")
         sock.bind(server_address)
 
         # listen for incoming connections
@@ -38,7 +39,7 @@ class FTPReceiver:
 
         # wait for a connection
         while True:
-            print >> sys.stderr, 'Waiting for a connection...'
+            print("Waiting for a connection...")
             connection, client_address = sock.accept()
             self.connected(connection, client_address, filename)
 
@@ -55,7 +56,7 @@ class FTPReceiver:
 
         # handle the connection
         try:
-            print >> sys.stderr, 'Connection from ', client
+            print("Connection from " + client)
 
             sequence = 0
 
@@ -65,7 +66,7 @@ class FTPReceiver:
                 # receive message and append to full message
                 data = connection.recv(16)
                 message += data
-                print >> sys.stderr, 'received "%s"' % data
+                print("received " + data)
 
                 # todo: check data and compute checksum here
                 isChecksumCorrect = self.validateChecksum(data)
@@ -87,10 +88,10 @@ class FTPReceiver:
                 ack = (sequence, 0000000000000000, 1010101010101010)
 
                 if data:
-                    print >> sys.stderr, 'Sending ACK back to the client '
+                    print("Sending ACK back to the client")
                     connection.sendall(ack)
                 else:
-                    print >> sys.stderr, 'No more data from ', client
+                    print("No more data from " + client)
                     break
 
         finally:
@@ -99,6 +100,7 @@ class FTPReceiver:
             connection.close()
 
             # write data to output file specific from p2mpserver invokation
+            print("writing output file")
             f = open(filename + ".txt", "w+")
             f.write(message)
             f.close()
